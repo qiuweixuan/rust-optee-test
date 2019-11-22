@@ -1,0 +1,4 @@
+cargo:rustc-link-search=/mnt/e/open-project/rust/rust-optee-trustzone-sdk/examples/dragonfly/ta/target/aarch64-unknown-optee-trustzone/release/build/ta-18cba427e2553fa1/out
+cargo:rerun-if-changed=ta.lds
+cargo:rustc-link-search=/mnt/e/open-project/rust/rust-optee-trustzone-sdk/optee/optee_os/out/arm/export-ta_arm64/lib
+cargo:rustc-link-lib=static=utee

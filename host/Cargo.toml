@@ -1,0 +1,22 @@
+[package]
+name = "dragonfly"
+version = "0.1.0"
+authors = ["The Rust OP-TEE TrustZone SDK Project Developers"]
+license = "Apache-2.0"
+repository = "https://github.com/mesalock-linux/rust-optee-trustzone-sdk.git"
+description = "An example of Rust OP-TEE TrustZone SDK."
+edition = "2018"
+
+[dependencies]
+libc = "0.2.48"
+proto = { path = "../proto" }
+optee-teec = { path = "../../../optee-teec" }
+num-bigint = "0.2.3"
+ring = "0.16.9"
+
+
+[build_dependencies]
+uuid = { version = "0.7", features = ["v4"] }
+
+[profile.release]
+lto = true
