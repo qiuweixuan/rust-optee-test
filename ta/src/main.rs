@@ -132,6 +132,8 @@ fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
 
 // TA configurations
 const TA_FLAGS: u32 = 0;
+// const TA_DATA_SIZE: u32 = 32 * 1024 * 4 * 4;
+// const TA_STACK_SIZE: u32 = 2 * 1024 * 32;
 const TA_DATA_SIZE: u32 = 32 * 1024 * 4;
 const TA_STACK_SIZE: u32 = 2 * 1024 * 4;
 const TA_VERSION: &[u8] = b"0.1\0";

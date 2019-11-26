@@ -20,7 +20,142 @@ use  super::dragonfly_ffc;
 use dragonfly_ffc::{FFCElement,Peer};
 
 
+pub fn test_dragonfly_key_exchange() -> Result<()> {
 
+    trace_println!("\n[+] TA invoke test_dragonfly_key_exchange\n");
+
+    let group15_elemnt: FFCElement = Default::default(); 
+
+    // let password: &[u8] = b"abc1238";
+    // let sta_mac: &[u8] = b"44:67:2D:2C:91:A6";
+    // let ap_mac: &[u8] = b"44:37:2C:2F:91:36";
+
+    let password: &[u8] = b"abcdefgh";
+    let sta_mac: &[u8] = b"02:00:00:00:01:00";
+    let ap_mac: &[u8] = b"02:00:00:00:00:00";
+
+    let sta_name:&[u8] = b"STA";
+    let ap_name:&[u8] = b"AP";
+
+    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group15_elemnt);
+    let sta_password_element = peer_sta.initiate(ap_mac)?;
+    trace_println!("peer_sta.initiate password_element : {}",sta_password_element);
+
+    trace_println!("--------------------------");
+    let peer_ap = Peer::new(&password,&ap_mac,&ap_name,&group15_elemnt);
+    let ap_password_element = peer_ap.initiate(sta_mac)?;
+    trace_println!("peer_ap.initiate password_element : {}",ap_password_element);
+    trace_println!("--------------------------");
+
+    let sta_private_str = b"369de1458282fb76548b6b88d25eb1b39b85202e58780004c500d9e2d448cee023a41e01e4a3857be297ca9b0aeb710fac965a192ca450f2b1d045919e1540096e144f31b08aa5567585509b5af417cc3aeca5d5d1e7b4d9bd08a23b21e10eda59a30ef9417227f26f19b2314e20edc31e237e4151737f479aa7f2af1374d9919ba95afe819a522f33ec746714a7965792b93ebd3e3b23b3dcf5b6c033fe6e71a73d0727e49b294bb104c6dfb3d0fa6c3033f6283b1e84527ddb3e851cd3e86ee3bdd4198166905d628ac18556944861a190faeac7a4b5a39d0090533db26e24aea4785b1924a8a2b72e774d96506a6769e29a29525463406a8da99e57700409266ed3d3224e69721c02776df21a831f5278b0e8a0589e9c57506224f675483b9c1a10e29842bb3601de3e4b495a67860dfa67ced8e006818cff92609e03444737a63eedf7eff4712e8954085d696de733aeca74b829c0a498ccb17edf4d33f727aecbd5313b1530154a5950a0db811e09ac5301ca4404e12e39d010dcb57a4d";
+    let sta_private = gp_bigint::bigint_construct_from_hexstr(sta_private_str)?;
+    let sta_mask_str =  b"6aca2ccb867cc9b18827a0ccebf976c52d8eef21b526f8149a5623890f91620201a25e44a62a3bd54a580ab866f1305e8ac080fb0cea31912ecab35ff40c11dacd7601d0247f3a615ebb117f9bafd7e888c8625686392f926fa8c30922f1d399752efe97e97b7de09b0b68dabbe15f53127fe8049160e9ff5c3baaf48de0c6c93f6e36139c7e29d12027e75750003a8da96d3c173399116c94229add40f124f90fdb8f4087713ff748762f0b210632ac9b186218e0dfb7be00bc2038f387ea2395926cca22db6b21501c48242df8cac78ac0c50a6499556867dd86c9225a6b67ef914e6b117b19435371d86010740527be3aa5c258ac707a764d632887fcf096c4c1ee2037edcf038a00e9a8446bb54d93dec995797252fb897065d36302257713128a87dfb056606814e3b8ddc6db19097bffdcc9f9113d47f11ca0e6f72339af8c0b1030ff9117b8629dffa2171ddf6f3004f1eb4beaae6bab20146e7f06b4987abe2cb42585014ab203544e82f47f4421711dd7fa8c43dd3124159cf1e065";
+    let sta_mask = gp_bigint::bigint_construct_from_hexstr(sta_mask_str)?;
+
+    let ap_private_str = b"7ecc5a3d7f9cfee156b0ada0eb2d2a2ab2bca037f1f4d5f98563d8f89f835ce6c45eb3af305db1d3d706cce8259c790c06a2ef5e1e0371bf6be0804f2efd07aaf81d2dac36fc06a221e595d340820db5a059d62bb335aeebcd5d08faea379a1a45b3ba1589d26b2122e7e793f2c26dd396197531ed3f4c8dc7aba17ed697c7182a009ebe694208f040ebca0e49ddb63bac809006fec29310236f6ccae190dcc85ac307dccdc29e7f1a0ea612532b3e19e61cff3b8d87398e72ba753cb29e7b91df040ded44c4934e002e3679bf3194a13cb7806019acfd7eb2f4a198fbe8ae0f35ab01b63c5fa5f60dbcc21783ea2b642b6e8dadf14d3a3fd47201864fb1d8c56c9cc48396b03d4b05599bfc4a6a6047d5fb27fb31c406e67e1d173ec675e5ae4730aae202d65ba53c8e76bad1ecbac8341fad8ec2bc13e7c2d03e0c2e8f516c99c56b5e717a22cccea967ef061c059cdcf6039322fd2a84626325737f67a057cba8f0dd670c6a28c107ef3fbe254e7e9d2816fb1ec8b00ea037489da46f21c1";
+    let ap_private = gp_bigint::bigint_construct_from_hexstr(ap_private_str)?;
+    let ap_mask_str = b"676651fd3ce6efb55c743bcf0d9100acfe506fd3b551ca0280ae90975bedcc4faef9b63cd2f80b2c31fe296b4bcb0db5f118b47c09f61a22313b58a2a735ac5b9715487dc2e875819753243e73ee5ab4eeb99e4e0d75c5004a4c0f9174e990234d848b733d602be395c3da1e32ba6a5bd321f5e2e49086eeb3ac43266d305b18cc20b0c83679cb0db163ea0337cabd1224de298ce1c19cedeef8773efd43bf900b3ef22cf937d440ee82743c41ac3147f6edcd56d23ed18a231de5264194d10e52b918a0f215f669554e0e023f071c8f194cda9b502f6e35ee3ed7a166f4607f86be0e1654f24c5abe48c55dc0a3b2c3b67024928cea0ff84209959b040c649eb2a9eca4c6a5f0c5208e74057a685e4eb215b48ef548860a2682f9aabbd000b52a8a587d97b79b89addf0af94d015c943bf3b5e902a02c09a2b4c4ef1f69887e5511d4e3bbb8a122c2ab9367cbb6086d155f1de342ad9e74c82598cada4fafe18ef585c45cf2ffc1e363924dc2ac1cf0ce04eeaa252391a59d088cbb622d2f67";
+    let ap_mask = gp_bigint::bigint_construct_from_hexstr(ap_mask_str)?;
+
+    // let (sta_private,sta_mask,sta_scalar,sta_element) = peer_sta.commit_exchange(&sta_password_element)?;
+    // trace_println!("--------------------------");
+    // let (ap_private,ap_mask,ap_scalar,ap_element) = peer_ap.commit_exchange(&ap_password_element)?;
+
+    
+    let (sta_scalar,sta_element) = peer_sta.commit_exchange_with_priv_mask(&sta_password_element,&sta_private,&sta_mask)?;
+    trace_println!("--------------------------");
+    let (ap_scalar,ap_element) = peer_ap.commit_exchange_with_priv_mask(&ap_password_element,&ap_private,&ap_mask)?;
+    trace_println!("--------------------------");
+
+
+    let (sta_kck,sta_ss_hex,sta_token) = peer_sta.compute_shared_secret(&ap_scalar,&ap_element,&sta_password_element,&sta_private,&sta_scalar,&sta_element)?;
+    trace_println!("--------------------------");
+    let (ap_kck,ap_ss_hex,ap_token) = peer_ap.compute_shared_secret(&sta_scalar,&sta_element,&ap_password_element,&ap_private,&ap_scalar,&ap_element)?;
+    
+    trace_println!("--------------------------");
+    peer_sta.confirm_exchange(&ap_scalar,&ap_element,&sta_password_element,&sta_private,&sta_scalar,&sta_element,&sta_kck,&sta_ss_hex,&ap_token)?;
+    trace_println!("--------------------------");
+    peer_ap.confirm_exchange(&sta_scalar,&sta_element,&ap_password_element,&ap_private,&ap_scalar,&ap_element,&ap_kck,&ap_ss_hex,&sta_token)?;
+    
+
+
+    Ok(())
+}
+
+
+
+pub fn test_password_element_derivation() -> Result<()> {
+
+    let group5_elemnt: FFCElement = Default::default(); 
+    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
+    group5_elemnt.order.get_bit_count() + 64);
+    trace_println!("group5_elemnt:\n{}.", group5_elemnt);
+    let num_bits = group5_elemnt.prime.get_bit_count() + 64;
+
+
+    let password: &[u8] = b"abc1238";
+    let sta_mac: &[u8] = b"44:67:2D:2C:91:A6";
+    let ap_mac: &[u8] = b"44:37:2C:2F:91:36";
+    let sta_name:&[u8] = b"STA";
+    let _ap_name:&[u8] = b"AP";
+    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group5_elemnt);
+
+    let k: u8 = 40;
+    let mut found = true;
+    let label_str: &[u8] = b"Dragonfly Hunting And Pecking";
+    let mut count: u8 = 1;
+
+
+    let mut password_element = BigInt::new(0);
+    while count <= k || found == false{
+        
+        let password_base = peer_sta.compute_hashed_password(&ap_mac, &count)?;
+        //trace_println!("password_base:{:02x?}",password_base);
+
+        let temp = peer_sta.compute_password_key(&password_base,label_str,num_bits)?;
+        trace_println!("temp:{}",&temp);
+
+        //seed = (temp mod(p - 1)) + 1
+        let mut one = BigInt::new(1);
+        one.convert_from_s32(1);
+        let p_1 = BigInt::sub(&group5_elemnt.prime,&one);
+        let seed = BigInt::module(&temp,&p_1);
+        let mut seed = BigInt::add(&seed,&one);
+        gp_bigint::bigint_normalize(&mut seed);
+        trace_println!("seed:{}",&seed);
+
+        // temp = seed ^ ((prime - 1) / order) mod prime
+
+        let exp = match group5_elemnt.is_safe_prime {
+            true =>{
+                /*
+                * exp = (prime - 1) / 2 for the group used here, so this becomes:
+                * password_element (temp) = seed ^ 2 modulo prime
+                */
+                let mut two = BigInt::new(2);
+                two.convert_from_s32(2);
+                two
+            },
+            false =>{
+                let (quot, _rem) = BigInt::divide(&p_1,&group5_elemnt.order);
+                quot
+            }
+        };
+        let seed = gp_bigint::bigint_expmod(&seed,&exp,&group5_elemnt.prime)?;
+        trace_println!("seed:{}",&seed);
+        
+        if BigInt::compare_big_int(&seed,&one) > 0{
+            password_element = seed;
+            found = true;
+        }
+        
+        count = count + 1;
+    }
+    trace_println!("password_element:{}",&password_element);
+
+
+    Ok(())
+}
 
 
 
@@ -118,10 +253,10 @@ pub fn test_bigint() -> Result<()> {
 
 pub fn test_peer() -> Result<()> {
 
-    test_compute_password_base()?;
-    test_compute_password_key()?;
-    test_password_element_derivation()?;
-    test_peer_initiate()?;
+    // test_compute_password_base()?;
+    // test_compute_password_key()?;
+    // test_password_element_derivation()?;
+    test_dragonfly_key_exchange()?;
     Ok(())
 }
 
@@ -204,133 +339,8 @@ pub fn test_fmm() -> Result<()> {
 
 
 
-pub fn test_password_element_derivation() -> Result<()> {
-
-    let group5_elemnt: FFCElement = Default::default(); 
-    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    group5_elemnt.order.get_bit_count() + 64);
-    trace_println!("group5_elemnt:\n{}.", group5_elemnt);
-    let num_bits = group5_elemnt.prime.get_bit_count() + 64;
 
 
-    let password: &[u8] = b"abc1238";
-    let sta_mac: &[u8] = b"44:67:2D:2C:91:A6";
-    let ap_mac: &[u8] = b"44:37:2C:2F:91:36";
-    let sta_name:&[u8] = b"STA";
-    let _ap_name:&[u8] = b"AP";
-    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group5_elemnt);
-
-    let k: u8 = 40;
-    let mut found = true;
-    let label_str: &[u8] = b"Dragonfly Hunting And Pecking";
-    let mut count: u8 = 1;
-
-
-    let mut password_element = BigInt::new(0);
-    while count <= k || found == false{
-        
-        let password_base = peer_sta.compute_hashed_password(&ap_mac, &count)?;
-        //trace_println!("password_base:{:02x?}",password_base);
-
-        let temp = peer_sta.compute_password_key(&password_base,label_str,num_bits)?;
-        trace_println!("temp:{}",&temp);
-
-        //seed = (temp mod(p - 1)) + 1
-        let mut one = BigInt::new(1);
-        one.convert_from_s32(1);
-        let p_1 = BigInt::sub(&group5_elemnt.prime,&one);
-        let seed = BigInt::module(&temp,&p_1);
-        let mut seed = BigInt::add(&seed,&one);
-        gp_bigint::bigint_normalize(&mut seed);
-        trace_println!("seed:{}",&seed);
-
-        // temp = seed ^ ((prime - 1) / order) mod prime
-
-        let exp = match group5_elemnt.is_safe_prime {
-            true =>{
-                /*
-                * exp = (prime - 1) / 2 for the group used here, so this becomes:
-                * password_element (temp) = seed ^ 2 modulo prime
-                */
-                let mut two = BigInt::new(2);
-                two.convert_from_s32(2);
-                two
-            },
-            false =>{
-                let (quot, _rem) = BigInt::divide(&p_1,&group5_elemnt.order);
-                quot
-            }
-        };
-        let seed = gp_bigint::bigint_expmod(&seed,&exp,&group5_elemnt.prime)?;
-        trace_println!("seed:{}",&seed);
-        
-        if BigInt::compare_big_int(&seed,&one) > 0{
-            password_element = seed;
-            found = true;
-        }
-        
-        count = count + 1;
-    }
-    trace_println!("password_element:{}",&password_element);
-
-
-    Ok(())
-}
-
-
-pub fn test_peer_initiate() -> Result<()> {
-
-    trace_println!("\n[+] TA invoke test_peer_initiate\n");
-
-    let group5_elemnt: FFCElement = Default::default(); 
-
-    let password: &[u8] = b"abc1238";
-    let sta_mac: &[u8] = b"44:67:2D:2C:91:A6";
-    let ap_mac: &[u8] = b"44:37:2C:2F:91:36";
-    let sta_name:&[u8] = b"STA";
-    let ap_name:&[u8] = b"AP";
-
-    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group5_elemnt);
-    let sta_password_element = peer_sta.initiate(ap_mac)?;
-    trace_println!("peer_sta.initiate password_element : {}",sta_password_element);
-    
-    let peer_ap = Peer::new(&password,&ap_mac,&ap_name,&group5_elemnt);
-    let ap_password_element = peer_ap.initiate(sta_mac)?;
-    trace_println!("peer_ap.initiate password_element : {}",ap_password_element);
-
-
-
-    let (sta_private,sta_mask,sta_scalar,sta_element) = peer_sta.commit_exchange(&sta_password_element)?;
-    let (ap_private,ap_mask,ap_scalar,ap_element) = peer_ap.commit_exchange(&ap_password_element)?;
-
-    trace_println!("--------------------------");
-    trace_println!("ap_scalar : {}",&ap_scalar);
-    trace_println!("ap_element : {}",&ap_element);
-
-    // let sta_password_element_str = b"643792bc5f7fad2ff7253a877e3eb99c63f4e4144540baeabd6343c9ef51fd66100317e1b46a5404c08a70b8672056b4afa724e59cea1d304ba3bdfed17e59ce5e38b2e0b7594180614f5503d3909ab31e33c7a423cdbf9f0b757186c6416bdcbdd67f321ae0534f042b871ff6cb5a3210644a1b680de6d8f1f47109ed9e98925e0ad6225940124913370e594497ba1453ae646f06abd21724197fb19a337d03e818b0f70152429c9879ffcae59a0f977c21f03647b2f303ace8d924b41f23be";
-    // let sta_password_element = gp_bigint::bigint_construct_from_hexstr(sta_password_element_str)?;
-    // let sta_private_str = b"2e5d3fea7d9d0d33ac553eecd5c3f27a310115d283e49377820195c8e67781b6f112a625b14b747fa4cc13d06eba0917246c775f5c732865701ae9349ea8729cde0bbade38204e63359a46e672a8d0a2fd5300692ab48f9ef732f5c3fa212b90c98229bbb79bece734a622154c904dce9a0f53d4a88b3e558ef7612f6694ce7518f204fe6846aeb6f58174d57a3372363c0d9fcfaa3dc18b1eff7e89bf7678636580d17dd84a873b14b9c0e1680bbdc87647f3c382902d2f58d2754b39bca874";
-    // let sta_private = gp_bigint::bigint_construct_from_hexstr(sta_private_str)?;
-
-
-    trace_println!("sta_password_element : {}",&sta_password_element);
-    trace_println!("sta_private : {}",&sta_private);
-
-
-    trace_println!("--------------------------");
-    let (sta_kck,sta_ss_hex,sta_token) = peer_sta.compute_shared_secret(&ap_scalar,&ap_element,&sta_password_element,&sta_private,&sta_scalar,&sta_element)?;
-    trace_println!("--------------------------");
-    let (ap_kck,ap_ss_hex,ap_token) = peer_ap.compute_shared_secret(&sta_scalar,&sta_element,&ap_password_element,&ap_private,&ap_scalar,&ap_element)?;
-
-      
-    trace_println!("--------------------------");
-    peer_sta.confirm_exchange(&ap_scalar,&ap_element,&sta_password_element,&sta_private,&sta_scalar,&sta_element,&sta_kck,&sta_ss_hex,&ap_token)?;
-    trace_println!("--------------------------");
-    peer_ap.confirm_exchange(&sta_scalar,&sta_element,&ap_password_element,&ap_private,&ap_scalar,&ap_element,&ap_kck,&ap_ss_hex,&sta_token)?;
-
-
-    Ok(())
-}
 
 
 

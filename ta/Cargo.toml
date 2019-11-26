@@ -12,7 +12,7 @@ libc = { path = "../../../rust/libc" }
 proto = { path = "../proto" }
 optee-utee-sys = { path = "../../../optee-utee/optee-utee-sys" }
 optee-utee = { path = "../../../optee-utee" }
-
+atoi = "0.3.2"
 
 
 [build_dependencies]

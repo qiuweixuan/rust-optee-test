@@ -61,19 +61,15 @@ pub enum U32Kind {
     LE,
 }
 
-pub fn transmute_u32_to_u8array(n: u32, mode: U32Kind)->[u8;4]{
-    let mut u8array = [0u8;4];
+pub fn transmute_u16_to_u8array(n: u32, mode: U32Kind)->[u8;2]{
+    let mut u8array = [0u8;2];
     match mode{
         U32Kind::BE => {
-            u8array[0] = ((n >> 24) & 0xff) as u8;
-            u8array[1] = ((n >> 16) & 0xff) as u8;
-            u8array[2] = ((n >> 8) & 0xff) as u8;
-            u8array[3] = (n & 0xff) as u8;
+            u8array[0] = ((n >> 8) & 0xff) as u8;
+            u8array[1] = (n & 0xff) as u8;
             u8array
         },
         U32Kind::LE => {
-            u8array[3] = ((n >> 24) & 0xff) as u8;
-            u8array[2] = ((n >> 16) & 0xff) as u8;
             u8array[1] = ((n >> 8) & 0xff) as u8;
             u8array[0] = (n & 0xff) as u8;
             u8array
