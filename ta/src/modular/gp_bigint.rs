@@ -8,6 +8,7 @@ use std::cmp::Ordering::{self, Equal, Greater, Less};
 use std::u32;
 use std::iter::repeat;
 
+use super::time;
 
 //gpstr_from_hexstr
 pub fn gpstr_from_hexstr(bytes_str: &[u8]) -> Result<Vec<u8>> {
@@ -139,27 +140,40 @@ pub fn bigint_expmod(base: &BigInt,exp: &BigInt,modular: &BigInt) -> Result<BigI
     let mut base_pow_i = bigint_assign(base);
     
     for i in 0..exp.get_bit_count(){
+        
+        // time::print_time();
+
         if exp.get_bit(i) {
-            
+
             let mut mul = BigInt::multiply(&result,&base_pow_i);
             bigint_normalize(&mut mul);
             // let ( _ , rem) = bigint_div_rem(&mul,&modular)?;
-            let mut rem = BigInt::module(&mul,&modular);
-            result = rem;
+
+            // let mut rem = BigInt::module(&mul,&modular);
+            // result = rem; 
+            result = BigInt::module(&mul,&modular);
+
             //result = bigint_assign(&rem);
             bigint_normalize(&mut result);
            
-            // result = BigInt::mul_mod(&result,&base_pow_i,&modular);
-            // bigint_normalize(&mut result);
+            /* result = BigInt::mul_mod(&result,&base_pow_i,&modular);
+            bigint_normalize(&mut result); */
+
+            /* result = bigint_fmm(&result,&base_pow_i,&modular)?;
+            bigint_normalize(&mut result); */
         }
         
+        
+
         let mut mul = BigInt::multiply(&base_pow_i,&base_pow_i);
         bigint_normalize(&mut mul);
         // let ( _ , rem) = bigint_div_rem(&mul,&modular)?;
-        let mut rem = BigInt::module(&mul,&modular);
-        base_pow_i = rem;
+        /* let mut rem = BigInt::module(&mul,&modular);
+        base_pow_i = rem; */
+        base_pow_i =  BigInt::module(&mul,&modular);
         bigint_normalize(&mut base_pow_i);
         
+       
 
         // result = BigInt::mul_mod(&base_pow_i,&base_pow_i,&modular);
         // bigint_normalize(&mut result);

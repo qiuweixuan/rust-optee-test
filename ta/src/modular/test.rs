@@ -16,6 +16,8 @@ struct DigestOp {
 
 use  super::gp_bigint;
 use  super::dragonfly_ffc;
+use  super::time;
+
 
 use dragonfly_ffc::{FFCElement,Peer};
 
@@ -243,19 +245,17 @@ pub fn test_ffc_element_construct() -> Result<()> {
 
 pub fn test_bigint() -> Result<()> {
 
-    test_div_rem()?;
-    test_div_rem_core()?;
-    test_bigint_expmod()?;
+    // test_div_rem()?;
+    // test_div_rem_core()?;
+    // test_bigint_expmod()?;
     test_fmm()?;
+    test_fmm_time()?;
     Ok(())
 }
 
 
 pub fn test_peer() -> Result<()> {
 
-    // test_compute_password_base()?;
-    // test_compute_password_key()?;
-    // test_password_element_derivation()?;
     test_dragonfly_key_exchange()?;
     Ok(())
 }
@@ -337,6 +337,56 @@ pub fn test_fmm() -> Result<()> {
     Ok(())
 }
 
+
+pub fn test_fmm_time() -> Result<()> {
+    let op1 = b"03e803e803e803e803e803e803e803e803e803e803e803e803e8";
+    let op2 = b"0640064006400640064006400640064006400640064006400640";
+    let op_mod = b"45";
+
+    
+    let op1 = gp_bigint::bigint_construct_from_hexstr(op1)?;
+    let op2 = gp_bigint::bigint_construct_from_hexstr(op2)?;
+    let op_mod = gp_bigint::bigint_construct_from_hexstr(op_mod)?;
+    trace_println!("--------------------------");
+    time::print_time();
+    let result = BigInt::mul_mod(&op1,&op2,&op_mod);
+    time::print_time();
+    trace_println!("--------------------------");
+
+
+    trace_println!("op1:{}",op1);
+    trace_println!("op2:{}",op2);
+    trace_println!("op_mod:{}",op_mod);
+    trace_println!("mul_mod_result:{}",result);
+
+    trace_println!("--------------------------");
+    time::print_time();
+
+    // let op_mod_fmm_context = BigIntFMMContext::new(op_mod.get_bit_count(),&op_mod)?;
+    
+
+    // let mut op1_fmm = BigIntFMM::new(op1.get_bit_count());
+    // op1_fmm.convert_from_big_int(&op1,&op_mod,&op_mod_fmm_context);
+
+    // let mut op2_fmm = BigIntFMM::new(op2.get_bit_count());
+    // op2_fmm.convert_from_big_int(&op2,&op_mod,&op_mod_fmm_context);
+
+    // let mut result_fmm = BigIntFMM::new(op_mod.get_bit_count());
+    // result_fmm.compute_fmm(&op1_fmm,&op2_fmm,&op_mod,&op_mod_fmm_context);
+
+    // let mut result_bigint = BigInt::new(op_mod.get_bit_count());
+
+    // result_bigint.convert_from_big_int_fmm(&result_fmm,&op_mod,&op_mod_fmm_context);
+
+    let mut result_bigint = gp_bigint::bigint_fmm(&op1,&op2,&op_mod)?;
+
+    time::print_time();
+    trace_println!("--------------------------");
+
+    trace_println!("fmm_result:{}",result_bigint);
+
+    Ok(())
+}
 
 
 

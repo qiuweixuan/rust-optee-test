@@ -14,6 +14,7 @@ use optee_utee::{Random};
 use optee_utee::{Error, ErrorKind};
 
 use  super::gp_bigint;
+use  super::time;
 
 struct DigestOp {
     op: Digest,
@@ -507,11 +508,15 @@ impl<'a> Peer<'a>{
 
         // scalar = (private + mask) modulo q
         let scalar = BigInt::add(&private,&mask);
+        time::print_time();
         let (_, scalar) = gp_bigint::bigint_div_rem(&scalar, &self.ffc_elemnt.order)?;
+        time::print_time();
 
         //Element = inverse(scalar-op(mask, PE))
         let element = self.ffc_elemnt.scalar_op(&mask,&password_element)?;
+        time::print_time();
         let element = self.ffc_elemnt.inverse_op(&element)?;
+        time::print_time();
 
         
         trace_println!("scalar:{}",&scalar);

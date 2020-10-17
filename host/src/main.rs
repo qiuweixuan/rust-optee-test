@@ -2,9 +2,7 @@ use optee_teec::{Context, Operation, ParamType, Session, Uuid};
 use optee_teec::{ParamNone, ParamTmpRef, ParamValue};
 use proto::{Command, UUID};
 
-
 //use num_bigint::{BigInt};
-
 
 fn big_int(session: &mut Session) -> optee_teec::Result<()> {
     let number0 = [
@@ -16,17 +14,16 @@ fn big_int(session: &mut Session) -> optee_teec::Result<()> {
     let p1 = ParamValue::new(number1, 0, ParamType::ValueInput);
     let mut operation = Operation::new(0, p0, p1, ParamNone, ParamNone);
 
-    session.invoke_command(Command::Compare as u32, &mut operation)?;
-    session.invoke_command(Command::Convert as u32, &mut operation)?;
-    session.invoke_command(Command::Add as u32, &mut operation)?;
-    session.invoke_command(Command::Sub as u32, &mut operation)?;
-    session.invoke_command(Command::Multiply as u32, &mut operation)?;
-    session.invoke_command(Command::Divide as u32, &mut operation)?;
-    session.invoke_command(Command::Module as u32, &mut operation)?;
-    session.invoke_command(Command::TestFFCElement as u32, &mut operation)?;
-    session.invoke_command(Command::TestGPBigInt as u32, &mut operation)?;
+    // session.invoke_command(Command::Compare as u32, &mut operation)?;
+    // session.invoke_command(Command::Convert as u32, &mut operation)?;
+    // session.invoke_command(Command::Add as u32, &mut operation)?;
+    // session.invoke_command(Command::Sub as u32, &mut operation)?;
+    // session.invoke_command(Command::Multiply as u32, &mut operation)?;
+    // session.invoke_command(Command::Divide as u32, &mut operation)?;
+    // session.invoke_command(Command::Module as u32, &mut operation)?;
+    // session.invoke_command(Command::TestFFCElement as u32, &mut operation)?;
+    // session.invoke_command(Command::TestGPBigInt as u32, &mut operation)?;
     session.invoke_command(Command::TestPeer as u32, &mut operation)?;
-    
 
     Ok(())
 }
