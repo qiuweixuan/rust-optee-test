@@ -118,12 +118,12 @@ pub fn bigint_assign(src: &BigInt) -> BigInt {
 }
 
 pub fn numbiguint_to_gpbigint(src: &BigUint) -> BigInt {
-    let src_str = hex::decode(src.to_str_radix(16)).unwrap();
-    bigint_construct_from_gpstr(&src_str).unwrap()
+    let src_str = src.to_str_radix(16);
+    bigint_construct_from_hexstr(&src_str.as_bytes()).unwrap()
 }
 
 pub fn gpbigint_to_numbiguint(src: &BigInt) ->  BigUint {
-    let src_hex_str =  bigint_to_hexstr(&src).unwrap();
+    let src_hex_str =  bigint_to_hexstr(&src).unwrap(); 
     BigUint::parse_bytes(&src_hex_str,16).unwrap()
 }
 
@@ -150,9 +150,10 @@ pub fn bigint_expmod(base: &BigInt,exp: &BigInt,modular: &BigInt) -> Result<BigI
     let biguint_base = gpbigint_to_numbiguint(&base);
     let biguint_exp = gpbigint_to_numbiguint(&exp);
     let biguint_modular = gpbigint_to_numbiguint(&modular);
-
     let biguint_result = biguint_base.modpow(&biguint_exp,&biguint_modular);
     let result = numbiguint_to_gpbigint(&biguint_result);
+
+
     // let mut result : BigInt = bigint_construct_from_s32(1);
     // let mut result = BigInt::new(modular.get_bit_count());
     // result.convert_from_s32(1);

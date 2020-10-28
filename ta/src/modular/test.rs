@@ -250,17 +250,35 @@ fn test_modpow() -> Result<()>{
     time::print_time();
     trace_println!("BigUint modpow:{:x?} ", ss.to_str_radix(16));
 
-    // let tmp_str = hex::decode(ss.to_str_radix(16)).unwrap();
-    // let bigint_ss = gp_bigint::bigint_construct_from_gpstr(&tmp_str).unwrap();
+    let old_gpbigint =  gp_bigint::numbiguint_to_gpbigint(&ss);
+    trace_println!("BigUint modpow:{} ", old_gpbigint);
+    let old_numbigint = gp_bigint::gpbigint_to_numbiguint(&old_gpbigint);
+    trace_println!("BigUint modpow:{:x?} ", old_numbigint.to_str_radix(16));
+    let new_gpbigint =  gp_bigint::numbiguint_to_gpbigint(&old_numbigint);
+    let new_numbigint =  gp_bigint::gpbigint_to_numbiguint(&new_gpbigint);
+    assert_eq!(old_gpbigint.convert_to_octet_string()?,new_gpbigint.convert_to_octet_string()?);
+    assert_eq!(old_numbigint.to_str_radix(16),new_numbigint.to_str_radix(16));
 
-    let bigint_ss =  gp_bigint::numbiguint_to_gpbigint(&ss);
-    trace_println!("BigUint modpow:{} ", bigint_ss);
 
-    // let ss_hex =  gp_bigint::bigint_to_hexstr(&bigint_ss)?;
-    // let tmp = BigUint::parse_bytes(&ss_hex,16).unwrap();
-
-    ss = gp_bigint::gpbigint_to_numbiguint(&bigint_ss);
+    let prvi = BigUint::parse_bytes(b"739972957a28d472bf7cb9f6d0bc2d341822e44735f552d608e7dee790e0ea9282f190411628ec295e22201c620e87b5b124fb089b855681c86ca7df2a0d47caa127e9af110b7702a373ee17f4cf23ed64a553b93343320cc2816339eb201f608b8b0140f16a9da050d9b119c3fb04ce1dcf7080b861d3c0dc073a58781e94cde14ce5931a381dd3bd48fe0391b598c47a75438e698df4f74c6e858c4428561bcc5af2147c99097ad2fbe42b4ae0fa09aae9c99c39f5baf700689237da9435d8c94fe3d5a763940d0363e082fae0b7b9af407fc4675e3acf9f7c7169e024d138c66df5c762aaa6ffa9fe20b941509bd21b32fc1a482d0340fbc7e3b83dc167cac36be882140cd9e61f2f5ce3f53d119cdedf375fba489bc9923e0d9d80788a23659a0db2e0284013289033fd9767fb752d606aedac90cf10c904210556045939799263739fbae0b5f6c7b74e25fa2076d99cd1d334b181ba6702b9860787297d12f95f2bed16d5b7f4ba492b3097bdbd2ecc893753af612a26e672cafc553fee", 16).unwrap();
+    let mut ss  = BigUint::parse_bytes(b"c40eb7628785c0c8eee789dc564bfa3cf4ad22a0de16324259ec20942b888925ce1b12340262af4205af0a464a754f2586b3a228f5f6abe0fe0a51947640a73346289d45a0fd07eafe0b8cb96dc436ab9a36e9779b675ded301794b10e840f39c8776c168d0537b41de8b94e732825ea055fa782795df215b42e263611f899c98bd5166157113b0ad492a4138de5876ca0c6107d4645cf2f7bfc71c78b69a820ac8f1a96b708818df0f9a73962bec59c0b7630a1824fb507d494b8033a78408f7a1abb7db12723cc798c520d0bd532a9309da3d360c78147496b8015b2979598b50914cf776e21d5ad0fa8b1e7f85e7624b896d1f37fd4d837a9d5e7154bca7cfa079df6d12cfe41a0842ff385954fb612d20b34f3c6ce6fa0c30df3a1ed8709228a8710e37b6579e56d64b4322f79338e8765d05d91f5e97e5c3246afdc2702bcd5ced4c1e546d279739d78be467811b8d2f23259704cc680910656c8280a01d3a2c4c93190056d343ee47dc2bad9ae78c3600a2e3490e2773b03ad80027db4", 16).unwrap();
+    let prime = BigUint::parse_bytes(b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff", 16).unwrap();
+    
+    
+    time::print_time();
+    ss = ss.modpow(&prvi,&prime);
+    time::print_time();
     trace_println!("BigUint modpow:{:x?} ", ss.to_str_radix(16));
+
+    let old_gpbigint =  gp_bigint::numbiguint_to_gpbigint(&ss);
+    trace_println!("BigUint modpow:{} ", old_gpbigint);
+    let old_numbigint = gp_bigint::gpbigint_to_numbiguint(&old_gpbigint);
+    trace_println!("BigUint modpow:{:x?} ", old_numbigint.to_str_radix(16));
+    let new_gpbigint =  gp_bigint::numbiguint_to_gpbigint(&old_numbigint);
+    let new_numbigint =  gp_bigint::gpbigint_to_numbiguint(&new_gpbigint);
+    assert_eq!(old_gpbigint.convert_to_octet_string()?,new_gpbigint.convert_to_octet_string()?);
+    assert_eq!(old_numbigint.to_str_radix(16),new_numbigint.to_str_radix(16));
+
 
     Ok(())
 }
@@ -529,13 +547,22 @@ pub fn test_bigint_expmod() -> Result<()> {
     let prvi = gp_bigint::bigint_construct_from_hexstr(b"369de1458282fb76548b6b88d25eb1b39b85202e58780004c500d9e2d448cee023a41e01e4a3857be297ca9b0aeb710fac965a192ca450f2b1d045919e1540096e144f31b08aa5567585509b5af417cc3aeca5d5d1e7b4d9bd08a23b21e10eda59a30ef9417227f26f19b2314e20edc31e237e4151737f479aa7f2af1374d9919ba95afe819a522f33ec746714a7965792b93ebd3e3b23b3dcf5b6c033fe6e71a73d0727e49b294bb104c6dfb3d0fa6c3033f6283b1e84527ddb3e851cd3e86ee3bdd4198166905d628ac18556944861a190faeac7a4b5a39d0090533db26e24aea4785b1924a8a2b72e774d96506a6769e29a29525463406a8da99e57700409266ed3d3224e69721c02776df21a831f5278b0e8a0589e9c57506224f675483b9c1a10e29842bb3601de3e4b495a67860dfa67ced8e006818cff92609e03444737a63eedf7eff4712e8954085d696de733aeca74b829c0a498ccb17edf4d33f727aecbd5313b1530154a5950a0db811e09ac5301ca4404e12e39d010dcb57a4d")?;
     let ss  = gp_bigint::bigint_construct_from_hexstr(b"94be06686b897a0078c14e71a88bbeff4439abc643bbb6a0fc7ec55abf8672e32c4d10e8833411e1fac79fe1367aee989fe92ca7855f22c1c2f733caaf33ab19d85e819a6770576aee4e64e991077c00263639af2880f4ae495297659f69b7e187ff3fbef455053f771e8596e16410d53312f686687eb70bb0cc17f1f75a7a295bcff4f703bc4cb5bb568885e70d60d0b1aa886ef576c12e9e4a2063ed29d620ee014cb65361f9540fa86bbc11b613d65bcf506f7b54d008e9aa3424fb362823f7a86a29aab28629105118d64e0a3b09847701d8f3ec21f8d5f4c63a5a862608b24594bae69234a76cd1a33ba293d0bf88edc96fcba92f8a8de58bb6274775034be18133dc8486389832d4e37dd620088943b687d49bff789cd4846312d6e419490c533b42f958cbde5ab7d5e7c132be8aa9c1978bef45ae425af9f2d42874faaaf4a99264543c8f48bc0cd815da3b676bec3c0bc1bd9f9499d5c60febb7c0165bd9a1d46569927b84f0a471c6b7a952cb4995832703dea113b0cb48ca43c2ff")?;
     let prime = gp_bigint::bigint_construct_from_hexstr(b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff")?;
-    
-    //  ss = ss.modpow(&prvi,&prime);
-    let cal_result = gp_bigint::bigint_expmod(&ss, &prvi, &prime)?;
 
+    let cal_result = gp_bigint::bigint_expmod(&ss, &prvi, &prime)?;
     trace_println!("cal_result:{}",cal_result);
+    trace_println!("cal_result:\n {:02x?}", &cal_result.convert_to_octet_string()?);
+
+    let ss  = gp_bigint::bigint_construct_from_hexstr(b"c40eb7628785c0c8eee789dc564bfa3cf4ad22a0de16324259ec20942b888925ce1b12340262af4205af0a464a754f2586b3a228f5f6abe0fe0a51947640a73346289d45a0fd07eafe0b8cb96dc436ab9a36e9779b675ded301794b10e840f39c8776c168d0537b41de8b94e732825ea055fa782795df215b42e263611f899c98bd5166157113b0ad492a4138de5876ca0c6107d4645cf2f7bfc71c78b69a820ac8f1a96b708818df0f9a73962bec59c0b7630a1824fb507d494b8033a78408f7a1abb7db12723cc798c520d0bd532a9309da3d360c78147496b8015b2979598b50914cf776e21d5ad0fa8b1e7f85e7624b896d1f37fd4d837a9d5e7154bca7cfa079df6d12cfe41a0842ff385954fb612d20b34f3c6ce6fa0c30df3a1ed8709228a8710e37b6579e56d64b4322f79338e8765d05d91f5e97e5c3246afdc2702bcd5ced4c1e546d279739d78be467811b8d2f23259704cc680910656c8280a01d3a2c4c93190056d343ee47dc2bad9ae78c3600a2e3490e2773b03ad80027db4")?;
+    let prvi = gp_bigint::bigint_construct_from_hexstr(b"739972957a28d472bf7cb9f6d0bc2d341822e44735f552d608e7dee790e0ea9282f190411628ec295e22201c620e87b5b124fb089b855681c86ca7df2a0d47caa127e9af110b7702a373ee17f4cf23ed64a553b93343320cc2816339eb201f608b8b0140f16a9da050d9b119c3fb04ce1dcf7080b861d3c0dc073a58781e94cde14ce5931a381dd3bd48fe0391b598c47a75438e698df4f74c6e858c4428561bcc5af2147c99097ad2fbe42b4ae0fa09aae9c99c39f5baf700689237da9435d8c94fe3d5a763940d0363e082fae0b7b9af407fc4675e3acf9f7c7169e024d138c66df5c762aaa6ffa9fe20b941509bd21b32fc1a482d0340fbc7e3b83dc167cac36be882140cd9e61f2f5ce3f53d119cdedf375fba489bc9923e0d9d80788a23659a0db2e0284013289033fd9767fb752d606aedac90cf10c904210556045939799263739fbae0b5f6c7b74e25fa2076d99cd1d334b181ba6702b9860787297d12f95f2bed16d5b7f4ba492b3097bdbd2ecc893753af612a26e672cafc553fee")?;
+    let prime = gp_bigint::bigint_construct_from_hexstr(b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff")?;
+    
+    let cal_result = gp_bigint::bigint_expmod(&ss, &prvi, &prime)?;
+    trace_println!("cal_result:{}",cal_result);
+    trace_println!("cal_result:\n {:02x?}", &cal_result.convert_to_octet_string()?);
+
     Ok(())
 }
 
 
 
+ 

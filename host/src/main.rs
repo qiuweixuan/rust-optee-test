@@ -22,8 +22,8 @@ fn big_int(session: &mut Session) -> optee_teec::Result<()> {
     // session.invoke_command(Command::Divide as u32, &mut operation)?;
     // session.invoke_command(Command::Module as u32, &mut operation)?;
     // session.invoke_command(Command::TestFFCElement as u32, &mut operation)?;
-    // session.invoke_command(Command::TestGPBigInt as u32, &mut operation)?;
-    session.invoke_command(Command::TestPeer as u32, &mut operation)?;
+    session.invoke_command(Command::TestGPBigInt as u32, &mut operation)?;
+    // session.invoke_command(Command::TestPeer as u32, &mut operation)?;
 
     Ok(())
 }
