@@ -10,6 +10,12 @@ use std::iter::repeat;
 
 use super::time;
 
+use optee_utee_sys as raw;
+
+
+use num_bigint::BigUint;
+use hex;
+
 //gpstr_from_hexstr
 pub fn gpstr_from_hexstr(bytes_str: &[u8]) -> Result<Vec<u8>> {
     let radix: u8 = 16;
@@ -108,13 +114,17 @@ pub fn bigint_construct_from_s32(src: i32)-> BigInt {
 }
 
 pub fn bigint_assign(src: &BigInt) -> BigInt {
-   /*  
-    let mut dst = BigInt::new(src.get_bit_count());
-    let src_str = src.convert_to_octet_string()?;
-    dst.convert_from_octet_string(&src_str,0)?;
-    Ok(dst)
-   */
     BigInt{data: src.data.clone()}
+}
+
+pub fn numbiguint_to_gpbigint(src: &BigUint) -> BigInt {
+    let src_str = hex::decode(src.to_str_radix(16)).unwrap();
+    bigint_construct_from_gpstr(&src_str).unwrap()
+}
+
+pub fn gpbigint_to_numbiguint(src: &BigInt) ->  BigUint {
+    let src_hex_str =  bigint_to_hexstr(&src).unwrap();
+    BigUint::parse_bytes(&src_hex_str,16).unwrap()
 }
 
 
@@ -136,49 +146,47 @@ int mod(int a,int b,int m){
 */   
 //https://blog.csdn.net/chen77716/article/details/7093600
 pub fn bigint_expmod(base: &BigInt,exp: &BigInt,modular: &BigInt) -> Result<BigInt> {
-    let mut result : BigInt = bigint_construct_from_s32(1);
-    let mut base_pow_i = bigint_assign(base);
     
-    for i in 0..exp.get_bit_count(){
+    let biguint_base = gpbigint_to_numbiguint(&base);
+    let biguint_exp = gpbigint_to_numbiguint(&exp);
+    let biguint_modular = gpbigint_to_numbiguint(&modular);
+
+    let biguint_result = biguint_base.modpow(&biguint_exp,&biguint_modular);
+    let result = numbiguint_to_gpbigint(&biguint_result);
+    // let mut result : BigInt = bigint_construct_from_s32(1);
+    // let mut result = BigInt::new(modular.get_bit_count());
+    // result.convert_from_s32(1);
+
+    // let mut base_pow_i = bigint_assign(base);
+
+    // let mid_mul_bit_count = modular.get_bit_count() + base.get_bit_count();
+    // let mut mid_mul = BigInt::new(mid_mul_bit_count);
+
+    // let base_mul_bit_count =  base.get_bit_count() * 2;
+    // let mut base_mul = BigInt::new(base_mul_bit_count);
+
+    // for i in 0..exp.get_bit_count(){
         
-        // time::print_time();
+    //     if exp.get_bit(i) {
+            
+    //         // let mut mul = BigInt::multiply(&result,&base_pow_i);
+    //         // bigint_normalize(&mut mul);
+    //         unsafe { raw::TEE_BigIntMul(mid_mul.data.as_mut_ptr(), result.data_ptr(), base_pow_i.data_ptr()) };
 
-        if exp.get_bit(i) {
-
-            let mut mul = BigInt::multiply(&result,&base_pow_i);
-            bigint_normalize(&mut mul);
-            // let ( _ , rem) = bigint_div_rem(&mul,&modular)?;
-
-            // let mut rem = BigInt::module(&mul,&modular);
-            // result = rem; 
-            result = BigInt::module(&mul,&modular);
-
-            //result = bigint_assign(&rem);
-            bigint_normalize(&mut result);
-           
-            /* result = BigInt::mul_mod(&result,&base_pow_i,&modular);
-            bigint_normalize(&mut result); */
-
-            /* result = bigint_fmm(&result,&base_pow_i,&modular)?;
-            bigint_normalize(&mut result); */
-        }
+    //         // result = BigInt::module(&mul,&modular);
+    //         // bigint_normalize(&mut result);
+    //         unsafe { raw::TEE_BigIntMod(result.data.as_mut_ptr(), mid_mul.data_ptr(), modular.data_ptr()) };
+    //     }
         
-        
+    //     // let mut mul = BigInt::multiply(&base_pow_i,&base_pow_i);
+    //     // bigint_normalize(&mut mul);
+    //     unsafe { raw::TEE_BigIntMul(base_mul.data.as_mut_ptr(), base_pow_i.data_ptr(), base_pow_i.data_ptr()) };
 
-        let mut mul = BigInt::multiply(&base_pow_i,&base_pow_i);
-        bigint_normalize(&mut mul);
-        // let ( _ , rem) = bigint_div_rem(&mul,&modular)?;
-        /* let mut rem = BigInt::module(&mul,&modular);
-        base_pow_i = rem; */
-        base_pow_i =  BigInt::module(&mul,&modular);
-        bigint_normalize(&mut base_pow_i);
+    //     // base_pow_i =  BigInt::module(&mul,&modular);
+    //     // bigint_normalize(&mut base_pow_i);
+    //     unsafe { raw::TEE_BigIntMod(base_pow_i.data.as_mut_ptr(), base_mul.data_ptr(), modular.data_ptr()) };
         
-       
-
-        // result = BigInt::mul_mod(&base_pow_i,&base_pow_i,&modular);
-        // bigint_normalize(&mut result);
-        
-    }
+    // }
     Ok(result)
 }
 

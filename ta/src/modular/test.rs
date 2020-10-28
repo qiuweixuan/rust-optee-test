@@ -7,7 +7,8 @@ use optee_utee::{Result};
 use optee_utee::{AlgorithmId, Digest,Mac};
 use optee_utee::{AttributeId, AttributeMemref, TransientObject, TransientObjectType};
 use optee_utee::{Random};
-
+use num_bigint::BigUint;
+use hex;
 
 struct DigestOp {
     op: Digest,
@@ -88,11 +89,11 @@ pub fn test_dragonfly_key_exchange() -> Result<()> {
 
 pub fn test_password_element_derivation() -> Result<()> {
 
-    let group5_elemnt: FFCElement = Default::default(); 
-    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    group5_elemnt.order.get_bit_count() + 64);
-    trace_println!("group5_elemnt:\n{}.", group5_elemnt);
-    let num_bits = group5_elemnt.prime.get_bit_count() + 64;
+    let group_elemnt: FFCElement = Default::default(); 
+    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group_elemnt.prime.get_bit_count() + 64, 
+    group_elemnt.order.get_bit_count() + 64);
+    trace_println!("group_elemnt:\n{}.", group_elemnt);
+    let num_bits = group_elemnt.prime.get_bit_count() + 64;
 
 
     let password: &[u8] = b"abc1238";
@@ -100,7 +101,7 @@ pub fn test_password_element_derivation() -> Result<()> {
     let ap_mac: &[u8] = b"44:37:2C:2F:91:36";
     let sta_name:&[u8] = b"STA";
     let _ap_name:&[u8] = b"AP";
-    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group5_elemnt);
+    let peer_sta = Peer::new(&password,&sta_mac,&sta_name,&group_elemnt);
 
     let k: u8 = 40;
     let mut found = true;
@@ -120,7 +121,7 @@ pub fn test_password_element_derivation() -> Result<()> {
         //seed = (temp mod(p - 1)) + 1
         let mut one = BigInt::new(1);
         one.convert_from_s32(1);
-        let p_1 = BigInt::sub(&group5_elemnt.prime,&one);
+        let p_1 = BigInt::sub(&group_elemnt.prime,&one);
         let seed = BigInt::module(&temp,&p_1);
         let mut seed = BigInt::add(&seed,&one);
         gp_bigint::bigint_normalize(&mut seed);
@@ -128,7 +129,7 @@ pub fn test_password_element_derivation() -> Result<()> {
 
         // temp = seed ^ ((prime - 1) / order) mod prime
 
-        let exp = match group5_elemnt.is_safe_prime {
+        let exp = match group_elemnt.is_safe_prime {
             true =>{
                 /*
                 * exp = (prime - 1) / 2 for the group used here, so this becomes:
@@ -139,11 +140,11 @@ pub fn test_password_element_derivation() -> Result<()> {
                 two
             },
             false =>{
-                let (quot, _rem) = BigInt::divide(&p_1,&group5_elemnt.order);
+                let (quot, _rem) = BigInt::divide(&p_1,&group_elemnt.order);
                 quot
             }
         };
-        let seed = gp_bigint::bigint_expmod(&seed,&exp,&group5_elemnt.prime)?;
+        let seed = gp_bigint::bigint_expmod(&seed,&exp,&group_elemnt.prime)?;
         trace_println!("seed:{}",&seed);
         
         if BigInt::compare_big_int(&seed,&one) > 0{
@@ -219,37 +220,60 @@ pub fn test_ffc_element_construct() -> Result<()> {
 
     // let prime = b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff";
     // let order = b"7fffffffffffffffe487ed5110b4611a62633145c06e0e68948127044533e63a0105df531d89cd9128a5043cc71a026ef7ca8cd9e69d218d98158536f92f8a1ba7f09ab6b6a8e122f242dabb312f3f637a262174d31bf6b585ffae5b7a035bf6f71c35fdad44cfd2d74f9208be258ff324943328f6722d9ee1003e5c50b1df82cc6d241b0e2ae9cd348b1fd47e9267afc1b2ae91ee51d6cb0e3179ab1042a95dcf6a9483b84b4b36b3861aa7255e4c0278ba36046511b993ffffffffffffffff";
-    // let group5_elemnt: FFCElement = FFCElement::new_from_hexstr(prime,order,true)?;
-    // trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    // group5_elemnt.order.get_bit_count() + 64);
+    // let group_elemnt: FFCElement = FFCElement::new_from_hexstr(prime,order,true)?;
+    // trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group_elemnt.prime.get_bit_count() + 64, 
+    // group_elemnt.order.get_bit_count() + 64);
 
-    let group5_elemnt: FFCElement = FFCElement::new_from_gpstr(&DH_GROUP5_PRIME,&DH_GROUP5_ORDER,true)?;
-    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    group5_elemnt.order.get_bit_count() + 64);
+    let group_elemnt: FFCElement = FFCElement::new_from_gpstr(&DH_GROUP5_PRIME,&DH_GROUP5_ORDER,true)?;
+    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group_elemnt.prime.get_bit_count() + 64, 
+    group_elemnt.order.get_bit_count() + 64);
 
-    let group5_elemnt: FFCElement = FFCElement::new()?;
-    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    group5_elemnt.order.get_bit_count() + 64);
+    let group_elemnt: FFCElement = FFCElement::new()?;
+    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group_elemnt.prime.get_bit_count() + 64, 
+    group_elemnt.order.get_bit_count() + 64);
 
-    let group5_elemnt: FFCElement = Default::default();
-    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group5_elemnt.prime.get_bit_count() + 64, 
-    group5_elemnt.order.get_bit_count() + 64);
-    trace_println!("group5_elemnt:\n{}.", group5_elemnt);
+    let group_elemnt: FFCElement = Default::default();
+    trace_println!("prime get_bit_count:{} , order get_bit_count {} .", group_elemnt.prime.get_bit_count() + 64, 
+    group_elemnt.order.get_bit_count() + 64);
+    trace_println!("group_elemnt:\n{}.", group_elemnt);
 
     Ok(())
 }
 
 
+fn test_modpow() -> Result<()>{
+    let prvi = BigUint::parse_bytes(b"369de1458282fb76548b6b88d25eb1b39b85202e58780004c500d9e2d448cee023a41e01e4a3857be297ca9b0aeb710fac965a192ca450f2b1d045919e1540096e144f31b08aa5567585509b5af417cc3aeca5d5d1e7b4d9bd08a23b21e10eda59a30ef9417227f26f19b2314e20edc31e237e4151737f479aa7f2af1374d9919ba95afe819a522f33ec746714a7965792b93ebd3e3b23b3dcf5b6c033fe6e71a73d0727e49b294bb104c6dfb3d0fa6c3033f6283b1e84527ddb3e851cd3e86ee3bdd4198166905d628ac18556944861a190faeac7a4b5a39d0090533db26e24aea4785b1924a8a2b72e774d96506a6769e29a29525463406a8da99e57700409266ed3d3224e69721c02776df21a831f5278b0e8a0589e9c57506224f675483b9c1a10e29842bb3601de3e4b495a67860dfa67ced8e006818cff92609e03444737a63eedf7eff4712e8954085d696de733aeca74b829c0a498ccb17edf4d33f727aecbd5313b1530154a5950a0db811e09ac5301ca4404e12e39d010dcb57a4d", 16).unwrap();
+    let mut ss  = BigUint::parse_bytes(b"94be06686b897a0078c14e71a88bbeff4439abc643bbb6a0fc7ec55abf8672e32c4d10e8833411e1fac79fe1367aee989fe92ca7855f22c1c2f733caaf33ab19d85e819a6770576aee4e64e991077c00263639af2880f4ae495297659f69b7e187ff3fbef455053f771e8596e16410d53312f686687eb70bb0cc17f1f75a7a295bcff4f703bc4cb5bb568885e70d60d0b1aa886ef576c12e9e4a2063ed29d620ee014cb65361f9540fa86bbc11b613d65bcf506f7b54d008e9aa3424fb362823f7a86a29aab28629105118d64e0a3b09847701d8f3ec21f8d5f4c63a5a862608b24594bae69234a76cd1a33ba293d0bf88edc96fcba92f8a8de58bb6274775034be18133dc8486389832d4e37dd620088943b687d49bff789cd4846312d6e419490c533b42f958cbde5ab7d5e7c132be8aa9c1978bef45ae425af9f2d42874faaaf4a99264543c8f48bc0cd815da3b676bec3c0bc1bd9f9499d5c60febb7c0165bd9a1d46569927b84f0a471c6b7a952cb4995832703dea113b0cb48ca43c2ff", 16).unwrap();
+    let prime = BigUint::parse_bytes(b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff", 16).unwrap();
+    time::print_time();
+    ss = ss.modpow(&prvi,&prime);
+    time::print_time();
+    trace_println!("BigUint modpow:{:x?} ", ss.to_str_radix(16));
 
+    // let tmp_str = hex::decode(ss.to_str_radix(16)).unwrap();
+    // let bigint_ss = gp_bigint::bigint_construct_from_gpstr(&tmp_str).unwrap();
+
+    let bigint_ss =  gp_bigint::numbiguint_to_gpbigint(&ss);
+    trace_println!("BigUint modpow:{} ", bigint_ss);
+
+    // let ss_hex =  gp_bigint::bigint_to_hexstr(&bigint_ss)?;
+    // let tmp = BigUint::parse_bytes(&ss_hex,16).unwrap();
+
+    ss = gp_bigint::gpbigint_to_numbiguint(&bigint_ss);
+    trace_println!("BigUint modpow:{:x?} ", ss.to_str_radix(16));
+
+    Ok(())
+}
 
 
 pub fn test_bigint() -> Result<()> {
 
     // test_div_rem()?;
     // test_div_rem_core()?;
-    // test_bigint_expmod()?;
-    test_fmm()?;
-    test_fmm_time()?;
+    // test_fmm()?;
+    // test_fmm_time()?;
+    test_bigint_expmod()?;
+    test_modpow()?;
     Ok(())
 }
 
@@ -339,11 +363,10 @@ pub fn test_fmm() -> Result<()> {
 
 
 pub fn test_fmm_time() -> Result<()> {
-    let op1 = b"03e803e803e803e803e803e803e803e803e803e803e803e803e8";
-    let op2 = b"0640064006400640064006400640064006400640064006400640";
-    let op_mod = b"45";
-
-    
+    let op1 = b"369de1458282fb76548b6b88d25eb1b39b85202e58780004c500d9e2d448cee023a41e01e4a3857be297ca9b0aeb710fac965a192ca450f2b1d045919e1540096e144f31b08aa5567585509b5af417cc3aeca5d5d1e7b4d9bd08a23b21e10eda59a30ef9417227f26f19b2314e20edc31e237e4151737f479aa7f2af1374d9919ba95afe819a522f33ec746714a7965792b93ebd3e3b23b3dcf5b6c033fe6e71a73d0727e49b294bb104c6dfb3d0fa6c3033f6283b1e84527ddb3e851cd3e86ee3bdd4198166905d628ac18556944861a190faeac7a4b5a39d0090533db26e24aea4785b1924a8a2b72e774d96506a6769e29a29525463406a8da99e57700409266ed3d3224e69721c02776df21a831f5278b0e8a0589e9c57506224f675483b9c1a10e29842bb3601de3e4b495a67860dfa67ced8e006818cff92609e03444737a63eedf7eff4712e8954085d696de733aeca74b829c0a498ccb17edf4d33f727aecbd5313b1530154a5950a0db811e09ac5301ca4404e12e39d010dcb57a4d";
+    let op2 = b"94be06686b897a0078c14e71a88bbeff4439abc643bbb6a0fc7ec55abf8672e32c4d10e8833411e1fac79fe1367aee989fe92ca7855f22c1c2f733caaf33ab19d85e819a6770576aee4e64e991077c00263639af2880f4ae495297659f69b7e187ff3fbef455053f771e8596e16410d53312f686687eb70bb0cc17f1f75a7a295bcff4f703bc4cb5bb568885e70d60d0b1aa886ef576c12e9e4a2063ed29d620ee014cb65361f9540fa86bbc11b613d65bcf506f7b54d008e9aa3424fb362823f7a86a29aab28629105118d64e0a3b09847701d8f3ec21f8d5f4c63a5a862608b24594bae69234a76cd1a33ba293d0bf88edc96fcba92f8a8de58bb6274775034be18133dc8486389832d4e37dd620088943b687d49bff789cd4846312d6e419490c533b42f958cbde5ab7d5e7c132be8aa9c1978bef45ae425af9f2d42874faaaf4a99264543c8f48bc0cd815da3b676bec3c0bc1bd9f9499d5c60febb7c0165bd9a1d46569927b84f0a471c6b7a952cb4995832703dea113b0cb48ca43c2ff";
+    let op_mod = b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff";
+  
     let op1 = gp_bigint::bigint_construct_from_hexstr(op1)?;
     let op2 = gp_bigint::bigint_construct_from_hexstr(op2)?;
     let op_mod = gp_bigint::bigint_construct_from_hexstr(op_mod)?;
@@ -361,22 +384,6 @@ pub fn test_fmm_time() -> Result<()> {
 
     trace_println!("--------------------------");
     time::print_time();
-
-    // let op_mod_fmm_context = BigIntFMMContext::new(op_mod.get_bit_count(),&op_mod)?;
-    
-
-    // let mut op1_fmm = BigIntFMM::new(op1.get_bit_count());
-    // op1_fmm.convert_from_big_int(&op1,&op_mod,&op_mod_fmm_context);
-
-    // let mut op2_fmm = BigIntFMM::new(op2.get_bit_count());
-    // op2_fmm.convert_from_big_int(&op2,&op_mod,&op_mod_fmm_context);
-
-    // let mut result_fmm = BigIntFMM::new(op_mod.get_bit_count());
-    // result_fmm.compute_fmm(&op1_fmm,&op2_fmm,&op_mod,&op_mod_fmm_context);
-
-    // let mut result_bigint = BigInt::new(op_mod.get_bit_count());
-
-    // result_bigint.convert_from_big_int_fmm(&result_fmm,&op_mod,&op_mod_fmm_context);
 
     let mut result_bigint = gp_bigint::bigint_fmm(&op1,&op2,&op_mod)?;
 
@@ -518,13 +525,14 @@ pub fn test_compute_password_key() -> Result<()> {
 
 
 pub fn test_bigint_expmod() -> Result<()> {
-    let prime = b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca237327ffffffffffffffff";
-    let order = b"7fffffffffffffffe487ed5110b4611a62633145c06e0e68948127044533e63a0105df531d89cd9128a5043cc71a026ef7ca8cd9e69d218d98158536f92f8a1ba7f09ab6b6a8e122f242dabb312f3f637a262174d31bf6b585ffae5b7a035bf6f71c35fdad44cfd2d74f9208be258ff324943328f6722d9ee1003e5c50b1df82cc6d241b0e2ae9cd348b1fd47e9267afc1b2ae91ee51d6cb0e3179ab1042a95dcf6a9483b84b4b36b3861aa7255e4c0278ba36046511b993ffffffffffffffff";
+    
+    let prvi = gp_bigint::bigint_construct_from_hexstr(b"369de1458282fb76548b6b88d25eb1b39b85202e58780004c500d9e2d448cee023a41e01e4a3857be297ca9b0aeb710fac965a192ca450f2b1d045919e1540096e144f31b08aa5567585509b5af417cc3aeca5d5d1e7b4d9bd08a23b21e10eda59a30ef9417227f26f19b2314e20edc31e237e4151737f479aa7f2af1374d9919ba95afe819a522f33ec746714a7965792b93ebd3e3b23b3dcf5b6c033fe6e71a73d0727e49b294bb104c6dfb3d0fa6c3033f6283b1e84527ddb3e851cd3e86ee3bdd4198166905d628ac18556944861a190faeac7a4b5a39d0090533db26e24aea4785b1924a8a2b72e774d96506a6769e29a29525463406a8da99e57700409266ed3d3224e69721c02776df21a831f5278b0e8a0589e9c57506224f675483b9c1a10e29842bb3601de3e4b495a67860dfa67ced8e006818cff92609e03444737a63eedf7eff4712e8954085d696de733aeca74b829c0a498ccb17edf4d33f727aecbd5313b1530154a5950a0db811e09ac5301ca4404e12e39d010dcb57a4d")?;
+    let ss  = gp_bigint::bigint_construct_from_hexstr(b"94be06686b897a0078c14e71a88bbeff4439abc643bbb6a0fc7ec55abf8672e32c4d10e8833411e1fac79fe1367aee989fe92ca7855f22c1c2f733caaf33ab19d85e819a6770576aee4e64e991077c00263639af2880f4ae495297659f69b7e187ff3fbef455053f771e8596e16410d53312f686687eb70bb0cc17f1f75a7a295bcff4f703bc4cb5bb568885e70d60d0b1aa886ef576c12e9e4a2063ed29d620ee014cb65361f9540fa86bbc11b613d65bcf506f7b54d008e9aa3424fb362823f7a86a29aab28629105118d64e0a3b09847701d8f3ec21f8d5f4c63a5a862608b24594bae69234a76cd1a33ba293d0bf88edc96fcba92f8a8de58bb6274775034be18133dc8486389832d4e37dd620088943b687d49bff789cd4846312d6e419490c533b42f958cbde5ab7d5e7c132be8aa9c1978bef45ae425af9f2d42874faaaf4a99264543c8f48bc0cd815da3b676bec3c0bc1bd9f9499d5c60febb7c0165bd9a1d46569927b84f0a471c6b7a952cb4995832703dea113b0cb48ca43c2ff")?;
+    let prime = gp_bigint::bigint_construct_from_hexstr(b"ffffffffffffffffc90fdaa22168c234c4c6628b80dc1cd129024e088a67cc74020bbea63b139b22514a08798e3404ddef9519b3cd3a431b302b0a6df25f14374fe1356d6d51c245e485b576625e7ec6f44c42e9a637ed6b0bff5cb6f406b7edee386bfb5a899fa5ae9f24117c4b1fe649286651ece45b3dc2007cb8a163bf0598da48361c55d39a69163fa8fd24cf5f83655d23dca3ad961c62f356208552bb9ed529077096966d670c354e4abc9804f1746c08ca18217c32905e462e36ce3be39e772c180e86039b2783a2ec07a28fb5c55df06f4c52c9de2bcbf6955817183995497cea956ae515d2261898fa051015728e5a8aaac42dad33170d04507a33a85521abdf1cba64ecfb850458dbef0a8aea71575d060c7db3970f85a6e1e4c7abf5ae8cdb0933d71e8c94e04a25619dcee3d2261ad2ee6bf12ffa06d98a0864d87602733ec86a64521f2b18177b200cbbe117577a615d6c770988c0bad946e208e24fa074e5ab3143db5bfce0fd108e4b82d120a93ad2caffffffffffffffff")?;
+    
+    //  ss = ss.modpow(&prvi,&prime);
+    let cal_result = gp_bigint::bigint_expmod(&ss, &prvi, &prime)?;
 
-    let op1 = &gp_bigint::bigint_construct_from_hexstr(prime)?;
-    let op2 = &gp_bigint::bigint_construct_from_hexstr(order)?;
-    let cal_result = &BigInt::multiply(op1,op1);
-    let (_,cal_result) = &gp_bigint::bigint_div_rem(cal_result,op2)?;
     trace_println!("cal_result:{}",cal_result);
     Ok(())
 }
