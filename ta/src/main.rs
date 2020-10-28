@@ -100,6 +100,13 @@ fn drive_test_peer() -> Result<()>{
     Ok(())
 }
 
+
+
+
+
+
+
+
 #[ta_invoke_command]
 fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
     trace_println!("[+] TA invoke command");
@@ -112,8 +119,8 @@ fn invoke_command(cmd_id: u32, params: &mut Parameters) -> Result<()> {
     n0.convert_from_octet_string(n0_buffer.buffer(), 0)?;
     n1.convert_from_s32(n1_value.a() as i32);
 
-    
-  
+
+
     match Command::from(cmd_id) {
         Command::Compare => compare(&n0, &n1),
         Command::Convert => convert(&n0, &n1),

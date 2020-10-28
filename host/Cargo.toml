@@ -11,9 +11,10 @@ edition = "2018"
 libc = "0.2.48"
 proto = { path = "../proto" }
 optee-teec = { path = "../../../optee-teec" }
-num-bigint = "0.2.3"
+num-bigint = "0.3.0"
 ring = "0.16.9"
-
+tokio = "0.1.22"
+hex = "0.3.1"
 
 [build_dependencies]
 uuid = { version = "0.7", features = ["v4"] }
