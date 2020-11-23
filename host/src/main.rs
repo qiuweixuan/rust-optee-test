@@ -3,6 +3,7 @@ use optee_teec::{ParamNone, ParamTmpRef, ParamValue};
 use proto::{Command, UUID};
 
 //use num_bigint::{BigInt};
+// use message_passing_interface;
 
 fn big_int(session: &mut Session) -> optee_teec::Result<()> {
     let number0 = [
@@ -23,7 +24,8 @@ fn big_int(session: &mut Session) -> optee_teec::Result<()> {
     // session.invoke_command(Command::Module as u32, &mut operation)?;
     // session.invoke_command(Command::TestFFCElement as u32, &mut operation)?;
     session.invoke_command(Command::TestGPBigInt as u32, &mut operation)?;
-    // session.invoke_command(Command::TestPeer as u32, &mut operation)?;
+    session.invoke_command(Command::TestPeer as u32, &mut operation)?;
+    
 
     Ok(())
 }
@@ -36,5 +38,7 @@ fn main() -> optee_teec::Result<()> {
     big_int(&mut session)?;
 
     println!("Success");
+
+    // message_passing_interface::test_main()?;
     Ok(())
 }

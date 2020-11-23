@@ -15,6 +15,7 @@ num-bigint = "0.3.0"
 ring = "0.16.9"
 tokio = "0.1.22"
 hex = "0.3.1"
+# message_passing_interface = { path = "../../message_passing_interface/host" }
 
 [build_dependencies]
 uuid = { version = "0.7", features = ["v4"] }
